@@ -7,4 +7,13 @@
         <rosparam command="load" file="$(find stag_ros)/cfg/single_config.yaml"/>
 
     </node>
+
+    <node name="camera_info" pkg="feature_tracking" type="yaml_to_camera_info_publisher.py" output="screen" args="src/fusion-optim/feature_tracking/config/lowres_camera.yaml">
+    </node>
+
+    <!-- <node name="image_compression" pkg="image_transport" type="republish" output="screen">
+        <param name="in_transport" value="raw">
+        <
+        <param name="out_transport" value="compressed">
+    </node> -->
 </launch>

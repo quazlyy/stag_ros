@@ -4,7 +4,7 @@ errorCorrection: 8
 
 # Camera configuration
 camera_info_topic: /camera_info
-raw_image_topic: /camera/image
+raw_image_topic: /camera/lowres/image
 is_compressed: false
 
 # Node configuration

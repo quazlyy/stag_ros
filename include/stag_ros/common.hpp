@@ -38,7 +38,9 @@ struct Common {
     cv::Mat rVec, rMat, tVec;
     // optimize for 5 planar points
     // possibly choose to reduce to the 4 for use with advanced algos
-    cv::solvePnP(world, img, cameraMatrix, distortionMatrix, rVec, tVec);
+    (void)distortionMatrix;
+    cv::solvePnP(world, img, cameraMatrix, cv::Mat::zeros(0, 0, CV_64F), rVec,
+                 tVec);
     cv::Rodrigues(rVec, rMat);
     rMat.convertTo(output.colRange(0, 3), CV_64F);
     tVec.convertTo(output.col(3), CV_64F);

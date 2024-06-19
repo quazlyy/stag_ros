@@ -49,6 +49,69 @@ SOFTWARE.
 
 namespace stag_ros {
 
+cv::Point2d UndistortPoint(const cv::Point2d &p_distorted,
+                           const cv::Mat &distortionMat) {
+  const double thetad = std::sqrt(p_distorted.dot(p_distorted));
+  double theta = thetad;
+  for (size_t i = 0; i < 5; ++i) {
+    const double theta2 = theta * theta;
+    const double theta4 = theta2 * theta2;
+    const double theta6 = theta4 * theta2;
+    const double theta8 = theta4 * theta4;
+    theta = thetad / (1.0 + distortionMat.at<double>(0) * theta2 +
+                      distortionMat.at<double>(1) * theta4 +
+                      distortionMat.at<double>(2) * theta6 +
+                      distortionMat.at<double>(3) * theta8);
+  }
+  const double scaling = std::tan(theta) / thetad;
+  //   ROS_WARN_STREAM("Distorted:\n"
+  //                   << p_distorted << "\nUndistorted:\n"
+  //                   << scaling * p_distorted);
+  return scaling * p_distorted;
+}
+
+cv::Point2d LiftProjective(const cv::Point2d &p, const cv::Mat &cameraMatrix,
+                           const cv::Mat &distortionMat) {
+  // 1) unproject point to obtain unscaled landmark coordinates (homogeneous
+  // coords)
+  const double cx = cameraMatrix.at<double>(0, 2);
+  const double cy = cameraMatrix.at<double>(1, 2);
+  const double fx = cameraMatrix.at<double>(0, 0);
+  const double fy = cameraMatrix.at<double>(1, 1);
+  const double x_dist_h = (p.x - cx) / fx;
+  const double y_dist_h = (p.y - cy) / fy;
+
+  // 2) do undistortion
+  const cv::Point2d p_undist_h =
+      UndistortPoint(cv::Point2d(x_dist_h, y_dist_h), distortionMat);
+
+  // 3) apply camera model to pixel coordinates again
+  return cv::Point2d(fx * p_undist_h.x + cx, fy * p_undist_h.y + cy);
+}
+
+class TicToc {
+ public:
+  /**
+   * @brief Constructor
+   */
+  TicToc() : start_{std::chrono::system_clock::now()} {}
+
+  /**
+   * @brief Get elapsed time in milliseconds since creation of timer object
+   *
+   * @returns the milliseconds since instantiation
+   */
+  double Toc() {
+    end_ = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end_ - start_;
+    return elapsed_seconds.count() * 1000;
+  }
+
+ private:
+  std::chrono::time_point<std::chrono::system_clock> start_;
+  std::chrono::time_point<std::chrono::system_clock> end_;
+};
+
 StagNode::StagNode(ros::NodeHandle &nh,
                    image_transport::ImageTransport &imageT) {
   // Load Parameters
@@ -126,6 +189,7 @@ bool StagNode::getBundleIndex(const int id, int &bundle_index, int &tag_index) {
 }
 
 void StagNode::imageCallback(const sensor_msgs::ImageConstPtr &msg) {
+  TicToc t_img;
 #ifndef NDEBUG
   INSTRUMENT;
 #endif
@@ -167,11 +231,13 @@ void StagNode::imageCallback(const sensor_msgs::ImageConstPtr &msg) {
           std::vector<cv::Point2d> tag_image(5);
           std::vector<cv::Point3d> tag_world(5);
 
-          tag_image[0] = markers[i].center;
+          tag_image[0] =
+              LiftProjective(markers[i].center, cameraMatrix, distortionMat);
           tag_world[0] = tags[tag_index].center;
 
           for (size_t ci = 0; ci < 4; ++ci) {
-            tag_image[ci + 1] = markers[i].corners[ci];
+            tag_image[ci + 1] = LiftProjective(markers[i].corners[ci],
+                                               cameraMatrix, distortionMat);
             tag_world[ci + 1] = tags[tag_index].corners[ci];
           }
 
@@ -267,6 +333,10 @@ void StagNode::imageCallback(const sensor_msgs::ImageConstPtr &msg) {
     } else
       ROS_WARN("No markers detected");
   }
+  double toc_img = t_img.Toc();
+  t_img_ += toc_img;
+  cnt_img_++;
+  // ROS_WARN("STag:  IMG:  %.2f ms, avg: %.2f", toc_img, t_img_ / cnt_img_);
 }
 
 void StagNode::cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr &msg) {

@@ -83,6 +83,9 @@ class StagNode {
   // Tag and bundle info
   std::vector<Bundle> bundles;
   std::vector<Tag> tags;
+
+  double t_img_ = 0;
+  size_t cnt_img_ = 0;
 };
 
 }  // namespace stag_ros

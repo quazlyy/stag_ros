@@ -1,0 +1,39 @@
+<launch>
+    <node name="rosbag" pkg="rosbag" type="play" args="/fp/data/sequences/rnd/2024-06-17/Seq1/vrtk2_9578dc_2024-06-17-12-14-27_maximal_ros-cam.bag"  required="true"/>
+    <!-- <node name="rosbag" pkg="rosbag" type="play" args="/fp/data/sequences/rnd/2024-06-17/Seq2/vrtk2_9578dc_2024-06-17-12-16-38_maximal_ros-cam.bag"  required="true"/> -->
+
+    <node name="aruco_detect" pkg="aruco_detect" type="aruco_detect" output="screen">
+        <!-- Subscribe to the image topic -->
+        <param name="image" value="/camera"/>
+        <!-- Subscribe to the camera info topic -->
+        <param name="camera_info" value="/camera_info"/>
+        <!-- Specify the ArUco dictionary to use -->
+        <!-- <param name="dictionary" value="DICT_6X6_250"/> -->
+        <param name="dictionary" value="10"/>
+        <!-- Specify the frame ID for the camera -->
+        <param name="camera_frame" value="camera_frame"/>
+        <param name="publish_images" value="true"/>
+    </node>
+
+    <node name="camera_info" pkg="stag_ros" type="yaml_to_camera_info_publisher.py" output="screen"/>
+
+    <node name="republish" type="republish" pkg="image_transport" output="screen" args="raw in:=/camera/lowres/image compressed out:=/camera" />
+    <node name="republish_raw" type="republish" pkg="image_transport" output="screen" args="raw in:=/camera/lowres/image raw out:=/camera" />
+
+    <!-- rviz -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find stag_ros)/cfg/aruco.rviz"/>
+
+  <!-- Example of populating camera_info topic -->
+  <!-- <node name="camera_info_publisher" pkg="camera_calibration_parsers" type="camerainfo_to_yaml" output="screen">
+    <param name="camera_name" value="lowres_camera"/>
+    <param name="yaml_url" value="$(find stag_ros)/lowres_camera.yaml"/>
+    <remap from="camera_info" to="/camera/lowres/camera_info"/>
+  </node> -->
+
+  <!-- Node to publish camera info -->
+  <!-- <node name="camera_info_manager" pkg="camera_info_manager" type="camera_info_manager_node" output="screen">
+    <param name="camera_name" value="my_camera" />
+    <param name="file_url" value="file:/home/fixposition/ros_ws/src/stag_ros/cfg/lowres_camera.yaml" />
+  </node> -->
+
+</launch>

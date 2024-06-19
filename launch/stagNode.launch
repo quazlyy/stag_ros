@@ -8,7 +8,7 @@
 
     </node>
 
-    <node name="camera_info" pkg="feature_tracking" type="yaml_to_camera_info_publisher.py" output="screen" args="src/fusion-optim/feature_tracking/config/lowres_camera.yaml">
+    <node name="camera_info" pkg="stag_ros" type="yaml_to_camera_info_publisher.py" output="screen" args="src/stag_ros/cfg/lowres_camera.yaml">
     </node>
 
     <!-- <node name="image_compression" pkg="image_transport" type="republish" output="screen">

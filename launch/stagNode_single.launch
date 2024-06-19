@@ -12,7 +12,7 @@
         <rosparam command="load" file="$(find stag_ros)/cfg/single_config.yaml"/>
     </node>
 
-    <node name="camera_info" pkg="feature_tracking" type="yaml_to_camera_info_publisher.py" output="screen"/>
+    <node name="camera_info" pkg="stag_ros" type="yaml_to_camera_info_publisher.py" output="screen"/>
 
     <node name="republish" type="republish" pkg="image_transport" output="screen" args="raw in:=/camera/lowres/image compressed out:=/camera" />
 

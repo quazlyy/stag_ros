@@ -1,0 +1,42 @@
+<launch>
+    <!-- Play Rosbag -->
+    <node name="rosbag" pkg="rosbag" type="play" args="/fp/data/sequences/rnd/2024-06-18/Seq2/vrtk2_9578dc_2024-06-18-10-05-50_maximal_ros-cam.bag"  required="true"/>
+
+    <!-- STag -->
+    <node name="stag_node_13" pkg="stag_ros" type="stag_node" output="screen" required="true" args="/stag_ros/image_markers:=/stag_ros/image_markers_13 /stag_ros/bundles:=/stag_ros/bundles_13 /stag_ros/markers:=/stag_ros/markers_13">
+        <rosparam command="load" file="$(find stag_ros)/cfg/single_lowres_13.yaml"/>
+        <rosparam command="load" file="$(find stag_ros)/cfg/dict_config.yaml"/>
+    </node>
+    <node name="stag_node_15" pkg="stag_ros" type="stag_node" output="screen" required="true" args="/stag_ros/image_markers:=/stag_ros/image_markers_15 /stag_ros/bundles:=/stag_ros/bundles_15 /stag_ros/markers:=/stag_ros/markers_15">
+        <rosparam command="load" file="$(find stag_ros)/cfg/single_lowres_15.yaml"/>
+        <rosparam command="load" file="$(find stag_ros)/cfg/dict_config.yaml"/>
+    </node>
+    <node name="stag_node_17" pkg="stag_ros" type="stag_node" output="screen" required="true" args="/stag_ros/image_markers:=/stag_ros/image_markers_17 /stag_ros/bundles:=/stag_ros/bundles_17 /stag_ros/markers:=/stag_ros/markers_17">
+        <rosparam command="load" file="$(find stag_ros)/cfg/single_lowres_17.yaml"/>
+        <rosparam command="load" file="$(find stag_ros)/cfg/dict_config.yaml"/>
+    </node>
+    <node name="stag_node_19" pkg="stag_ros" type="stag_node" output="screen" required="true" args="/stag_ros/image_markers:=/stag_ros/image_markers_19 /stag_ros/bundles:=/stag_ros/bundles_19 /stag_ros/markers:=/stag_ros/markers_19">
+        <rosparam command="load" file="$(find stag_ros)/cfg/single_lowres_19.yaml"/>
+        <rosparam command="load" file="$(find stag_ros)/cfg/dict_config.yaml"/>
+    </node>
+    <node name="stag_node_21" pkg="stag_ros" type="stag_node" output="screen" required="true" args="/stag_ros/image_markers:=/stag_ros/image_markers_21 /stag_ros/bundles:=/stag_ros/bundles_21 /stag_ros/markers:=/stag_ros/markers_21">
+        <rosparam command="load" file="$(find stag_ros)/cfg/single_lowres_21.yaml"/>
+        <rosparam command="load" file="$(find stag_ros)/cfg/dict_config.yaml"/>
+    </node>
+    <node name="stag_node_23" pkg="stag_ros" type="stag_node" output="screen" required="true" args="/stag_ros/image_markers:=/stag_ros/image_markers_23 /stag_ros/bundles:=/stag_ros/bundles_23 /stag_ros/markers:=/stag_ros/markers_23">
+        <rosparam command="load" file="$(find stag_ros)/cfg/single_lowres_23.yaml"/>
+        <rosparam command="load" file="$(find stag_ros)/cfg/dict_config.yaml"/>
+    </node>
+
+    <!-- Camera Info -->
+    <node name="camera_info" pkg="stag_ros" type="yaml_to_camera_info_publisher_lowres.py"/>
+
+    <!-- rviz -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find stag_ros)/cfg/markers.rviz"/>
+
+    <!-- image_view -->
+    <node name="rqt_gui" pkg="rqt_gui" type="rqt_gui" output="screen" args="-p stag_dict"/>
+
+    <!-- Static TF for viz -->
+    <node name="base_link_to_camera_tf" pkg="tf2_ros" type="static_transform_publisher" args="0 0 1.0 0 0 -1.57 base_link CAM" />
+</launch>
